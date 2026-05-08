@@ -8,16 +8,38 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  tasks    Task[]
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String   @default("member")
+
+  tasks         Task[] @relation("TaskOwner")Z
+  assignedTasks Task[] @relation("AssignedTasks")
+
+  projects Project[]
+}
+
+model Project {
+  id      Int    @id @default(autoincrement())
+  name    String
+
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id])
+
+  tasks   Task[]
 }
 
 model Task {
-  id        Int      @id @default(autoincrement())
-  title     String
-  completed Boolean  @default(false)
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  id          Int      @id @default(autoincrement())
+  title       String
+  completed   Boolean  @default(false)
+
+  userId      Int
+  user        User     @relation("TaskOwner", fields: [userId], references: [id])
+
+  projectId   Int?
+  project     Project? @relation(fields: [projectId], references: [id])
+
+  assignedTo  Int?
+  assignedUser User?   @relation("AssignedTasks", fields: [assignedTo], references: [id])
 }

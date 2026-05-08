@@ -6,16 +6,17 @@ import bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
       data: {
-        email,
-        password: hashedPassword,
-      },
+      email,
+      password: hashedPassword,
+      role
+    },
     });
 
     res.status(201).json(user);
@@ -27,7 +28,7 @@ export const register = async (req: Request, res: Response) => {
 
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+ const { email, password, role } = req.body;
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
@@ -43,10 +44,15 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1h" }
-    );
+  {
+    userId: user.id,
+    role: user.role
+  },
+  process.env.JWT_SECRET!,
+  {
+    expiresIn: "1d"
+  }
+);
 
     res.json({ token });
 

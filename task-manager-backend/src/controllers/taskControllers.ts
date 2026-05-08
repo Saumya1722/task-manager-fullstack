@@ -7,15 +7,17 @@ const prisma = new PrismaClient();
 
 // CREATE TASK
 export const createTask = async (req: any, res: Response) => {
-  const { title } = req.body;
+ const { title, projectId, assignedTo } = req.body;
   const userId = req.user.userId;
 
   try {
     const task = await prisma.task.create({
-      data: {
-        title,
-        userId
-      }
+    data: {
+      title,
+      userId,
+      projectId,
+      assignedTo
+}
     });
 
     res.status(201).json(task);
